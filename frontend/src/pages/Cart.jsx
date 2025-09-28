@@ -32,65 +32,75 @@ const Cart = () => {
       </h1>
 
       <div className="space-y-4">
-        {cart.map((item) => (
-          <div
-            key={item.id}
-            className="flex flex-col sm:flex-row sm:items-center justify-between bg-white shadow rounded p-4 gap-4"
-          >
-            {/* Product Info */}
-            <div className="flex items-center gap-4">
-              <img
-                src={item.img}
-                alt={item.title}
-                className="w-24 h-24 object-cover rounded"
-              />
-              <div>
-                <h2 className="font-semibold text-lg">{item.title}</h2>
-                <p className="text-gray-500 text-sm sm:text-base">
-                  Ksh {item.price}
-                </p>
-              </div>
-            </div>
+        {cart.map((item) => {
+          
+          const imageUrl = item.image
+            ? `http://127.0.0.1:8000/storage/${item.image}`
+            : "/placeholder.png";
 
-            {/* Quantity + Remove */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 w-full sm:w-auto justify-between sm:justify-end">
-              {/* Quantity Selector */}
-              <div className="flex items-center gap-3 justify-center mb-2 sm:mb-0">
-                <button
-                  onClick={() =>
-                    updateQuantity(item.id, Math.max(1, item.quantity - 1))
-                  }
-                  className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                >
-                  -
-                </button>
-                <span className="font-medium">{item.quantity}</span>
-                <button
-                  onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
-                >
-                  +
-                </button>
+          return (
+            <div
+              key={item.id}
+              className="flex flex-col sm:flex-row sm:items-center justify-between bg-white shadow rounded p-4 gap-4"
+            >
+              {/* Product Info */}
+              <div className="flex items-center gap-4">
+                <img
+                  src={imageUrl}
+                  alt={item.title}
+                  className="w-24 h-24 object-cover rounded"
+                  onError={(e) => (e.target.src = "/placeholder.png")}
+                />
+                <div>
+                  <h2 className="font-semibold text-lg">{item.title}</h2>
+                  <p className="text-gray-500 text-sm sm:text-base">
+                    Ksh {item.price}
+                  </p>
+                </div>
               </div>
 
-              {/* Remove Button */}
-              <button
-                onClick={() => removeFromCart(item.id)}
-                className="text-red-500 hover:text-red-700 text-sm"
-              >
-                Remove
-              </button>
+              {/* Quantity + Remove */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6 w-full sm:w-auto justify-between sm:justify-end">
+                {/* Quantity Selector */}
+                <div className="flex items-center gap-3 justify-center mb-2 sm:mb-0">
+                  <button
+                    onClick={() =>
+                      updateQuantity(item.id, Math.max(1, item.quantity - 1))
+                    }
+                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    -
+                  </button>
+                  <span className="font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                  >
+                    +
+                  </button>
+                </div>
+
+                {/* Remove Button */}
+                <button
+                  onClick={() => removeFromCart(item.id)}
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Cart Total */}
       <div className="mt-6 text-center sm:text-right">
         <h2 className="text-xl font-bold mb-4">Total: Ksh {total}</h2>
-     <Link to='/check'>  <button className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 w-full sm:w-auto">
-          Proceed to Checkout
-        </button></Link> 
+        <Link to="/check">
+          <button className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 w-full sm:w-auto">
+            Proceed to Checkout
+          </button>
+        </Link>
       </div>
     </div>
   );

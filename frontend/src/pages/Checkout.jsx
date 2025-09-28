@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 
 const Checkout = () => {
   const { cart } = useCart();
@@ -10,19 +10,51 @@ const Checkout = () => {
 
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleCheckout = () => {
-    if (!phone || phone.length < 10) {
-      setMessage("Enter a valid phone number");
+  // Convert phone to 254 format
+  const formatPhone = (input) => {
+    let cleaned = input.replace(/\D/g, ""); // remove non-digits
+    if (cleaned.startsWith("07")) {
+      return "254" + cleaned.slice(1);
+    }
+    return cleaned;
+  };
+
+  const handleCheckout = async () => {
+    const formattedPhone = formatPhone(phone);
+
+    // Validate phone
+    if (!formattedPhone || !/^2547\d{8}$/.test(formattedPhone)) {
+      setMessage("Enter a valid Kenyan phone number, e.g., 07XXXXXXXX or 2547XXXXXXXX");
       return;
     }
-    setProcessing(true);
-    setMessage("Preparing payment...");
 
-    // sam call Laravel API here later on
-    setTimeout(() => {
+    setProcessing(true);
+    setMessage("Sending STK Push...");
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/stkpush", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: formattedPhone,
+          amount: total,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("STK Push sent! Check your phone for payment prompt.");
+      } else {
+        setMessage("Error: " + (data.error || JSON.stringify(data)));
+      }
+    } catch (err) {
+      setMessage("Request failed: " + err.message);
+    } finally {
       setProcessing(false);
-      setMessage("M-Pesa request would be sent here!");
-    }, 2000);
+    }
   };
 
   return (
@@ -32,10 +64,7 @@ const Checkout = () => {
       {/* Cart Items */}
       <div className="space-y-4 mb-6">
         {cart.map((item) => (
-          <div
-            key={item.id}
-            className="flex justify-between items-center border-b pb-2"
-          >
+          <div key={item.id} className="flex justify-between items-center border-b pb-2">
             <div>
               <p className="font-semibold">{item.title}</p>
               <p className="text-sm text-gray-500">
@@ -58,7 +87,7 @@ const Checkout = () => {
         type="text"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
-        placeholder="Enter M-Pesa Phone Number"
+        placeholder="Enter M-Pesa Phone Number (07XXXXXXXX or 2547XXXXXXXX)"
         className="border p-2 w-full rounded mb-4"
       />
 
